@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entregas-curso de programación BioPython</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Encabezado */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 18px;
+            font-weight: 400;
+            color: #ecf0f1;
+        }
+
+        /* Contenedor principal con menú lateral y contenido */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Menú lateral */
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar li:hover {
+            background-color: #3d566e;
+        }
+
+        .sidebar li.active {
+            background-color: #2c3e50;
+            border-left-color: #3498db;
+            font-weight: 500;
+        }
+
+        /* Área de contenido */
+        .content {
+            flex: 1;
+            padding: 30px;
+            background-color: #f5f5f5;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Estilos para la tarjeta de comandos */
+        .commands-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .commands-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .command-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+        }
+
+        .command-item:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .command-item.numpy {
+            background-color: #e8f0fe;
+            border-color: #4a90e2;
+        }
+
+        .command-item.math {
+            background-color: #e6f7e6;
+            border-color: #27ae60;
+        }
+
+        /* --- ESTILOS PARA SUB-MENÚ Y PDFs EMBEBIDOS --- */
+        .sub-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .sub-tab-btn {
+            padding: 10px 20px;
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .sub-tab-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .sub-tab-btn:hover:not(.active) {
+            background-color: #dce1e5;
+        }
+
+        /* Contenedor específico para los PDFs */
+        .pdf-viewer-container {
+            flex: 1;
+            position: relative;
+            min-height: 600px; /* Altura mínima para ver el PDF */
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .pdf-embed {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            border: none;
+        }
+
+        .sub-content {
+            display: none;
+            height: 100%;
+        }
+
+        .sub-content.active {
+            display: block;
+        }
+
+        /* Ajuste para la pestaña de entregas */
+        #tab4 {
+            padding: 20px;
+        }
+        
+        #tab4 .commands-card {
+            max-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+            
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            
+            .sidebar li {
+                padding: 10px 15px;
+                flex: 1 0 auto;
+                text-align: center;
+            }
+
+            .pdf-viewer-container {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Entregas-curso de programación BioPython</h1>
+        <h2>Alejandro Chinome Anteliz</h2>
+    </div>
+
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <div class="sidebar">
+            <ul>
+                <li class="active" data-tab="tab1">Comandos clase nueve</li>
+                <li data-tab="tab2">Próxima pestaña</li>
+                <li data-tab="tab3">Futura pestaña</li>
+                <!-- Nueva Pestaña -->
+                <li data-tab="tab4">entrega viernes 27febrero2026</li>
+            </ul>
+        </div>
+
+        <!-- Área de contenido -->
+        <div class="content">
+            <!-- Pestaña 1: Comandos clase nueve -->
+            <div id="tab1" class="tab-content active">
+                <div class="commands-card">
+                    <h3>📋 Comandos vistos hasta la fecha</h3>
+                    <div class="commands-grid">
+                        <div class="command-item">print(.)</div>
+                        <div class="command-item">print(f".")</div>
+                        <div class="command-item">input(.)</div>
+                        <div class="command-item">float(.)</div>
+                        <div class="command-item">int(.)</div>
+                        <div class="command-item">array(.)</div>
+                        <div class="command-item numpy">numpy</div>
+                        <div class="command-item math">math.</div>
+                        <div class="command-item">import</div>
+                        <div class="command-item">for</div>
+                    </div>
+                    <p style="margin-top: 20px; color: #7f8c8d; font-style: italic; text-align: center;">
+                        Total: 10 comandos básicos de Python/BioPython
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Próxima pestaña (placeholder) -->
+            <div id="tab2" class="tab-content">
+                <div class="commands-card">
+                    <h3>🔜 Próximos contenidos</h3>
+                    <p style="text-align: center; color: #7f8c8d; padding: 40px;">
+                        Esta pestaña estará disponible en futuras clases.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pestaña 3: Futura pestaña (placeholder) -->
+            <div id="tab3" class="tab-content">
+                <div class="commands-card">
+                    <h3>🔮 Futuras entregas</h3>
+                    <p style="text-align: center; color: #7f8c8d; padding: 40px;">
+                        Contenido en desarrollo para próximas semanas.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pestaña 4: Entrega Viernes 27 Febrero 2026 -->
+            <div id="tab4" class="tab-content">
+                <div class="commands-card">
+                    <h3>📅 Entrega Viernes 27 de Febrero de 2026</h3>
+                    
+                    <!-- Sub menú para los PDFs -->
+                    <div class="sub-menu">
+                        <button class="sub-tab-btn active" data-subtab="subtab_pdf1">Artículo Po-Shen Loh</button>
+                        <button class="sub-tab-btn" data-subtab="subtab_pdf2">Condicionales Python</button>
+                    </div>
+
+                    <!-- Contenedor del visor de PDFs -->
+                    <div class="pdf-viewer-container">
+                        <!-- PDF 1 -->
+                        <div id="subtab_pdf1" class="sub-content active">
+                            <!-- Se usa iframe para embeber el PDF real. Asegúrate de que el archivo exista en la carpeta -->
+                            <iframe src="Articulo_PoShenLoh27_02_2026.pdf" class="pdf-embed"></iframe>
+                        </div>
+
+                        <!-- PDF 2 -->
+                        <div id="subtab_pdf2" class="sub-content">
+                            <iframe src="Articulo_Condicionales_.pdf" class="pdf-embed"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Manejo de la navegación por pestañas principal
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.sidebar li');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            function activateTab(tabId) {
+                // Desactivar todas las pestañas y menús
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                menuItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Activar la pestaña seleccionada
+                const selectedTab = document.getElementById(tabId);
+                if (selectedTab) {
+                    selectedTab.classList.add('active');
+                }
+
+                // Activar el elemento del menú correspondiente
+                const activeMenuItem = Array.from(menuItems).find(
+                    item => item.dataset.tab === tabId
+                );
+                if (activeMenuItem) {
+                    activeMenuItem.classList.add('active');
+                }
+            }
+
+            // Agregar eventos click a los elementos del menú principal
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    activateTab(tabId);
+                });
+            });
+
+            // --- Lógica para el Sub-Menú de PDFs ---
+            const subMenuBtns = document.querySelectorAll('.sub-tab-btn');
+            
+            subMenuBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const subTabId = this.dataset.subtab;
+                    
+                    // Buscar el contenedor padre más cercano (.commands-card) para ámbito local
+                    const parentCard = this.closest('.commands-card');
+
+                    // Desactivar todos los botones y contenidos dentro de esta tarjeta
+                    parentCard.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+                    parentCard.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+
+                    // Activar el botón clickeado
+                    this.classList.add('active');
+
+                    // Activar el contenido del PDF correspondiente
+                    const targetContent = parentCard.querySelector('#' + subTabId);
+                    if(targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+
+            // Inicializar con la primera pestaña activa
+            activateTab('tab1');
+        });
+    </script>
+</body>
+</html>
